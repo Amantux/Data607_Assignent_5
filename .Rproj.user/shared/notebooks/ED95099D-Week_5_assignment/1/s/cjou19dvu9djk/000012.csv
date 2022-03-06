@@ -1,0 +1,8 @@
+"0","average_pop_50p <-mean(c(as.numeric(raw[2, ""Population.%""]) / as.numeric(raw[3, ""Population.%""]), (as.numeric(raw[2, ""X3""]) / as.numeric(raw[3, ""X3""]))))"
+"0","average_pop_50m <- mean(c(as.numeric(raw[4, ""Population.%""]) / as.numeric(raw[5, ""Population.%""]), (as.numeric(raw[4, ""X3""]) / as.numeric(raw[5, ""X3""]))))"
+"0",""
+"0","sum(average_pop_50m, average_pop_50p)"
+"1","[1]"
+"1"," 7152416"
+"1","
+"

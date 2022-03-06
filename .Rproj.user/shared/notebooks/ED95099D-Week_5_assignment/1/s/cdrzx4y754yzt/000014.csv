@@ -1,0 +1,3 @@
+"0","raw[2, ""Efficacy""] = ( 1 - ( as.numeric(raw[2, ""X5""] ) / as.numeric( raw[2, ""Severe.Cases""] ) ) )"
+"0","raw[4, ""Efficacy""] = ( 1 - ( as.numeric(raw[4, ""X5""] ) / as.numeric( raw[4, ""Severe.Cases""] ) ) )"
+"0","raw"

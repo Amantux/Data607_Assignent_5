@@ -1,0 +1,97 @@
+---
+title: Data 607 Week 5
+author: Alex Moyse
+output: 
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+<H1>The library load in </H1>
+
+```{r}
+library(tidyverse)
+library(openxlsx)
+```
+
+<H1>Let's first read in our data </H1>
+
+Firstly, lets specify our rows so that we do not read in the questions at the bottom as they unnecessarily complicate the data & provide issues with contextualizing and cleanly representing the data.  
+
+```{r, echo=TRUE}
+url.data <- "https://github.com/acatlin/data/blob/master/israeli_vaccination_data_analysis_start.xlsx?raw=true"
+raw <-read.xlsx(url.data, sheet=1, rows=c("1","2","3","4","5","6"))
+raw
+```
+
+<H1> Normalizing the population count </H1>
+
+In the raw data source, we are given a two by two grid representing an age cut off & vaccine status. As a part of this, we are given the person count, and the percent representation of the population in what I assume to be a two significant figure measure. If we take the counts and divide them by the percentage, then combine the count per age group, we should be able to get a reasonable estimate in terms of population. Since we have both % Vaccinated and Un-Vaccinated, it may make sense to average the two to temper the estimate. 
+
+```{r, echo=TRUE}
+average_pop_50p <-mean(c(as.numeric(raw[2, "Population.%"]) / as.numeric(raw[3, "Population.%"]), (as.numeric(raw[2, "X3"]) / as.numeric(raw[3, "X3"]))))
+average_pop_50m <- mean(c(as.numeric(raw[4, "Population.%"]) / as.numeric(raw[5, "Population.%"]), (as.numeric(raw[4, "X3"]) / as.numeric(raw[5, "X3"]))))
+sum(average_pop_50m, average_pop_50p)
+```
+<H2> Reviewing the population count </H2>
+
+So this population count is fairly wrong. Using the World Bank , the estimate for Israel's population in 2020 was 9.2 million, indicating that this answer is off by approximately ~23%. I believe this could be due to the fact that those under a certain age are not counted as part of the population due to the fact that they are generally excluded from experimental medical tests. 
+
+In that light, let's delve more and see if we can provide a closer estimate. Using data from the World Bank, people aged 0-14 years old account for approximately 27.8% of the population. In addition, recognizing that the vaccine roll out for children aged 12+ is still recent, it could indicate that the pops are for those age 12+, ie able to receive the vaccine were included in the population. As I am unable to easily get a more granular breakdown of age, I believe this is a reasonable assumption to account for the error in population.  
+ 
+ 
+https://www.timesofisrael.com/israel-to-start-vaccinating-kids-aged-5-11-who-have-severe-background-illnesses/
+
+<H1> Efficacy Calculation </H1>
+
+Using the definition provided in the project assignment, the efficacy is  (1 - (% fully vaccinated severe cases per 100K / % not vaccinated severe cases per 100K)). If we simplify that formula by removing the common factors, it becomes (1- #RateFullyVaccinated/#RateNotVaccinated). This causes a super easily formula that can easily be calculated. 
+```{r}
+raw[2, "Efficacy"] = ( 1 - ( as.numeric(raw[2, "X5"] ) / as.numeric( raw[2, "Severe.Cases"] ) ) )
+raw[4, "Efficacy"] = ( 1 - ( as.numeric(raw[4, "X5"] ) / as.numeric( raw[4, "Severe.Cases"] ) ) )
+raw
+```
+
+<H1> Efficacy Discussion</H1>
+
+As a unit of measure, Efficacy is a great metric in a controlled study, but not a good measure in an uncontrolled study as a lot of external factors may influence it. A great example would be is that that a large portion of elderly (ie >50) live in a communal living situation, radically increasing the probability of mass outbreaks if anyone in the community catches the disease. Practically in certain populations, its a self-fulfilling prophecy that those that are more likely to catch the disease get a vaccine to it, thereby skewing the Efficacy in the short run. Over time, this will level out, providing better insights. One key factor is that, behavioral changes like rates of going out, in-office work, and changes roles that require significant public interaction for those vaccinated vs not vaccinated could affect rates as well.  
+
+<H1>Discussing Rates of Severe Cases</H1>
+
+There are a few things to consider in terms of discussing how preventable Severe Cases were with the vaccine. Firstly, we must first consider that the >50 population has a higher rate of server cases with a vaccine than without, and part of this could be due to the various aspects detailed in the Efficacy Discussion above. In addition, this study does not adequately define severe cases and how that metric was determined. For example, in Massachusetts, Covid hospitalizations spike due to people were in the hospital from another illness or injury and tested positive for Covid, not knowing they had it. With the data as it currently stands, it is hard to draw conclusions from the efficacy due to the group of >50 years old having such a prevailing rate of vaccination, thereby most likely skewing the results of Severe Cases. Looking at <50 and using that as a basis, the efficacy of ~75% less likely to catch Covid is a fantastic number, and provides a reasonable proportion of both vaccinated and not-vaccinated in the population. 
+
+<H1> Pretty Table Making </H1>
+
+```{r}
+dataOut <- data.frame(matrix(vector(),ncol=7))
+dataOut <- rbind(dataOut, c(0,50,TRUE, as.numeric(raw[2, "X3"]), as.numeric(raw[3, "X3"]), as.numeric(raw[2, "X5"] ), as.numeric(raw[2, "Efficacy"])))
+dataOut <- rbind(dataOut, c(0,50,FALSE, as.numeric(raw[2, "Population.%"]), as.numeric(raw[3, "Population.%"]), as.numeric(raw[2, "Severe.Cases"] ), 0))
+dataOut <- rbind(dataOut, c(51,200,TRUE, as.numeric(raw[4, "X3"]), as.numeric(raw[5, "X3"]), as.numeric(raw[4, "X5"] ), as.numeric(raw[4, "Efficacy"])))
+dataOut <- rbind(dataOut, c(51,200,FALSE, as.numeric(raw[4, "Population.%"]), as.numeric(raw[5, "Population.%"]), as.numeric(raw[4, "Severe.Cases"] ), 0))
+
+colnames(dataOut) <-c("Age_Min","Age_Max","Vaccine_Status","Population_Size", "Population_Percentage", "Severe_Case", "Efficacy")
+dataOut
+```
+<H1> Conclusion </H1> 
+
+I really don't know what it is, but I really do not appreciate long table orientations. I realy think they make everything overly complex & irregular for little benefit. In terms of my table design, I decided to treat it like a simple relational database entry, creating booleans for Vaccine Status, and treating everything as a data entry. 
+
+From a layout perspective I found this easier to read and handle, and it allows for easy extension with more specific age ranges and associated parameters. In theory it would alow for super easy sorting and graphing, as well as a tie in for vaccine code, number of booster shots, etc. In theory you can even easily tie this in with data intake and map and handle many more parameters.  
+
+
+
+
+<H2> Citations </H2>
+
+“Population Ages 0-14 (% of Total Population) - Israel.” The World Bank, https://data.worldbank.org/indicator/SP.POP.0014.TO.ZS?locations=IL. 
+staff, TOI, et al. 
+
+“Population, Total - Israel.” The World Bank, https://data.worldbank.org/indicator/SP.POP.TOTL?locations=IL. 
+staff, TOI, et al. 
+
+“Israel to Start Vaccinating Kids Aged 5-11 Who Have Severe Background Illnesses.” The Times of Israel, The Times of Israel, 27 July 2021, https://www.timesofisrael.com/israel-to-start-vaccinating-kids-aged-5-11-who-have-severe-background-illnesses/. 

@@ -1,0 +1,8 @@
+"0","dataOut <- data.frame(matrix(vector(),ncol=7))"
+"0","dataOut <- rbind(dataOut, c(0,50,TRUE, as.numeric(raw[2, ""X3""]), as.numeric(raw[3, ""X3""]), as.numeric(raw[2, ""X5""] ), as.numeric(raw[2, ""Efficacy""])))"
+"0","dataOut <- rbind(dataOut, c(0,50,FALSE, as.numeric(raw[2, ""Population.%""]), as.numeric(raw[3, ""Population.%""]), as.numeric(raw[2, ""Severe.Cases""] ), 0))"
+"0","dataOut <- rbind(dataOut, c(51,200,TRUE, as.numeric(raw[4, ""X3""]), as.numeric(raw[5, ""X3""]), as.numeric(raw[4, ""X5""] ), as.numeric(raw[4, ""Efficacy""])))"
+"0","dataOut <- rbind(dataOut, c(51,200,FALSE, as.numeric(raw[4, ""Population.%""]), as.numeric(raw[5, ""Population.%""]), as.numeric(raw[4, ""Severe.Cases""] ), 0))"
+"0",""
+"0","colnames(dataOut) <-c(""Age_Min"",""Age_Max"",""Vaccine_Status"",""Population_Size"", ""Population_Percentage"", ""Severe_Case"", ""Efficacy"")"
+"0","dataOut"

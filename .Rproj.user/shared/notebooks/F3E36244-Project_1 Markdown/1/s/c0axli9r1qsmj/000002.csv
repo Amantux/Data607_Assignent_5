@@ -1,0 +1,27 @@
+"0","```r
+fileName=\"chess_scores.txt\"
+conn <- file(fileName,open=\"r\")
+line <-readLines(conn)
+test <- list()
+for (i in 4:(length(line))){
+  if (!startsWith(line[i], '-')) {
+    test[i] = (line[i]) 
+    i = i + 1
+  }
+}
+non_null_names <- which(!sapply(test, is.null))
+result = read_delim(paste(test[non_null_names], collapse = \"\n\"), delim='|', col_names=FALSE)
+```"
+"1","Rows: 128 Columns: 11
+-- Column specification ----------------------------------------------------------------------------------------
+Delimiter: \"|\"
+chr (10): X1, X2, X3, X4, X5, X6, X7, X8, X9, X10
+lgl  (1): X11
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+"
+"0","```r
+#result = read_delim(paste(line, collapse = \"\n\"), delim='|')
+print(result)
+```"

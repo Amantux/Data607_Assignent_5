@@ -1,0 +1,4 @@
+"0","```r
+row_odd <- seq_len(nrow(result)) %% 2
+head(result[row_odd == 0,])
+```"
